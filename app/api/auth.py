@@ -10,9 +10,10 @@ from app.db.models import User
 
 router = APIRouter()
 
-@router.post("/register")
-def register(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    print(form_data)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+def register(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.username == form_data.username).first()
     if user:
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -23,9 +24,12 @@ def register(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Dep
     return {"message": "User created successfully"}
 
 @router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+

@@ -1,35 +1,31 @@
 #app/services/document_service.py
-
-
 import os
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
-from app.db.models import Document
+from app.db.models import Document, User
 from unstructured.partition.auto import partition
 
-async def process_document(file: UploadFile, db: Session, current_user: str):
-    # Save the file
-    file_path = "uploads/{file.filename}"
-    with open(file_path, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
+async def process_document(file: UploadFile, db: Session, current_user: User):
+    os.makedirs("uploads", exist_ok=True)
+    file_path = f"uploads/{file.filename}"
+    try:
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail="Uploaded file is empty")
+            buffer.write(content)
 
-    # Parse the document using unstructured
-    elements = partition(file_path)
+        elements = partition(file_path)
+        text_content = "\n".join([str(element) for element in elements])
 
-    # Extract text content
-    text_content = "\n".join([str(element) for element in elements])
+        document = Document(
+            filename=file.filename, content=text_content, user_id=current_user.id
+        )
+        db.add(document)
+        db.commit()
+        db.refresh(document)
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    return {"message": "Document processed successfully", "document_id": document.id}
 
-    # Save document info to database
-    document = Document(
-        filename=file.filename,
-        content=text_content,
-        user_id=current_user
-    )
-    db.add(document)
-    db.commit()
-
-    # Clean up the file
-    os.remove(file_path)
-
-    return {"message": "Document processed successfully"}
