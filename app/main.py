@@ -7,16 +7,16 @@ from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update this with your frontend URL
+    allow_origins=["http://localhost:3000"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API routers
+
+
 app.include_router(auth.router, prefix="/api/auth")
 app.include_router(documents.router, prefix="/api/documents")
 app.include_router(rag.router, prefix="/api/rag")
