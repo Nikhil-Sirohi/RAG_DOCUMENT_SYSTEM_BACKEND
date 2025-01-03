@@ -26,7 +26,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-# Example for creating access tokens
 
 SECRET_KEY = "#&236#HBGTS"
 ALGORITHM = "HS256"
