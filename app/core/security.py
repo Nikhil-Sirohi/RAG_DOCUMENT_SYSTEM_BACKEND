@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.core.config import settings
-from app.db.base import get_db  # Adjust the path as per your project structure
+from app.db.base import get_db  
 from sqlalchemy.orm import Session
 from typing import Union
 from app.db.models import User
